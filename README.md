@@ -41,8 +41,20 @@ Use this area to document the iterative changes made to your application as each
 
 04-16-2019 12:45pm - Application now has fully-functional weather route, data, response.
 
-04-16-2019 1:10pmam - Weather route is synced, constructor function created objects with proper rendering. Site is redployed.
+04-16-2019 1:10pm - Weather route is synced, constructor function created objects with proper rendering. Site is redployed.
 
+04-17-2019 10:00am - Made 3 improvements:
+    <ul>
+        <li>Added comments for readability
+        <li>Fixed location error bug
+        <li>Made code more dry
+    </ul>
+
+04-17-2019 10:35pm - Implemented map method for Weather search to make code more dry.
 
 ## Credits and Collaborations
-<!-- Give credit (and a link) to other people or resources that helped you build this application. -->
+<!-- Give credit (and a link) to other people or resources that helped you build this application.
+Joseph Hangarter - Day 2 Navigator:  Features #1 & #2
+
+
+ -->

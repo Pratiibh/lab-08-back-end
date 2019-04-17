@@ -9,6 +9,7 @@ require('dotenv').config();
 const PORT = process.env.PORT || 3000 ;
 const express = require('express');
 const cors = require('cors');
+const superagent = require('superagent');
 
 let responseDataObject = {};
 
@@ -18,18 +19,13 @@ const app = express();
 app.use(cors());
 
 //server is doing this
-
-app.get('/location', (request, response) => {
-  response.send(searchLocationData(request.query.data) );
-
-})
+app.get('/location', searchLocationData);
 
 app.get('/weather', (request, response) => {
   response.send(searchWeatherData() );
 })
 
-//functions
-
+//Constructor Functions
 function LocationData(search_query, formatted_query, latitude, longitude){
   this.search_query = search_query;
   this.formatted_query = formatted_query;
@@ -42,40 +38,50 @@ function WeatherData(summary, time){
   this.time = time;
 }
 
-function searchLocationData(frontEndQuery) {
-  const search_query = frontEndQuery;
+//Other Functions
+function searchLocationData(request, response) {
+  //user input - ex: if they type in Seattle...search_quer = Seattle
+  const search_query = request.query.data;
+  const URL = `https://maps.googleapis.com/maps/api/geocode/json?address=${search_query}&key=${process.env.GEOCODE_API_KEY}`;
+  //grabLocationData = Full JSON file
+  /*
+  {
+    "results" : [
+      {
+        "address_components" : [
+          {
+            "long_name" : "Lynnwood",
+            "short_name" : "Lynnwood",
+            "types" : [ "locality", "political" ]
+          },
+          "formatted_address" : "Lynnwood, WA, USA",
+          "geometry" : {
+            "bounds" : {
+              "northeast" : {
+                "lat" : 47.85356789999999,
+                "lng" : -122.261618
+  */
+  // const grabLocationData = require('./data/geo.json');
+  superagent.get(URL).then(result => {
+    const searchedResult = result.body.results[0];
+    //formatted_query = "Lynnwood, WA, USA"
+    const formatted_query = searchedResult.formatted_address;
 
-  const grabLocationData = require('./data/geo.json');
-  const formatted_query = grabLocationData.results[0].formatted_address;
-  const latitude = grabLocationData.results[0].geometry.location.lat;
-  const longitude = grabLocationData.results[0].geometry.location.lng;
+    const latitude = searchedResult.geometry.location.lat;
+    const longitude = searchedResult.geometry.location.lng;
 
-  responseDataObject = new LocationData(search_query, formatted_query, latitude, longitude);
-  return responseDataObject;
+    //Create new object containing user input data
+    //responseDataObject = {Seattle, Lynnwood, WA, USA, somenumber, somenumber}
+    responseDataObject = new LocationData(search_query, formatted_query, latitude, longitude);
+    response.send(responseDataObject);
+  });
+
 }
 
 function searchWeatherData() {
-  const grabWeatherData = require('./data/darksky.json');
-  console.log("From Weather Data: " + grabWeatherData.longitude);
-  console.log("From object: " + responseDataObject.longitude);
-  if(grabWeatherData.latitude === responseDataObject.latitude && grabWeatherData.longitude === responseDataObject.longitude){
-    let dailyData = grabWeatherData.daily.data;
-    let results = [];
-    for(let i = 0; i < dailyData.length; i++){
-      let summary = dailyData[i].summary;
-      let time = new Date(dailyData[i].time * 1000).slice(1, 15) ;
-      let eachTime = new WeatherData(summary, time);
-
-      results.push(eachTime);
-    }
-
-    return results;
-  }
-}
-
-
-/*
-```
+  //Grab all weather data
+  /*
+    ```
 [
   {
     "forecast": "Partly cloudy until afternoon.",
@@ -87,9 +93,25 @@ function searchWeatherData() {
   },
   ...
 ]
-```
-*/
+  */
+  const grabWeatherData = require('./data/darksky.json');
+  if(grabWeatherData.latitude === responseDataObject.latitude && grabWeatherData.longitude === responseDataObject.longitude){
+    //dailyData = array of daily data objects
+    let dailyData = grabWeatherData.daily.data;
 
+    return dailyData.map((dailyDataObj) => {
+      //summary = "Foggy in the morning."
+      let summary = dailyDataObj.summary;
+      //time = 1540018800; converted to standart time
+      let time = new Date(dailyDataObj.time * 1000).toString().slice(0, 15) ;
+
+
+      //For each entry within dailyData array
+      //Create new weather object
+      new WeatherData(summary, time);
+    });
+  }
+}
 
 
 // server start
