@@ -23,6 +23,10 @@ app.get('/location', searchLocationData);
 
 app.get('/weather', searchWeatherData);
 
+app.use('*', (request, response) => {
+  response.send('Our server runs.');
+})
+
 //Constructor Functions
 function LocationData(search_query, formatted_query, latitude, longitude){
   this.search_query = search_query;
@@ -38,29 +42,18 @@ function WeatherData(summary, time){
 
 //Other Functions
 function searchLocationData(request, response) {
+
   //user input - ex: if they type in Seattle...search_quer = Seattle
   const search_query = request.query.data;
   const URL = `https://maps.googleapis.com/maps/api/geocode/json?address=${search_query}&key=${process.env.GEOCODE_API_KEY}`;
   //grabLocationData = Full JSON file
-  /*
-  {
-    "results" : [
-      {
-        "address_components" : [
-          {
-            "long_name" : "Lynnwood",
-            "short_name" : "Lynnwood",
-            "types" : [ "locality", "political" ]
-          },
-          "formatted_address" : "Lynnwood, WA, USA",
-          "geometry" : {
-            "bounds" : {
-              "northeast" : {
-                "lat" : 47.85356789999999,
-                "lng" : -122.261618
-  */
+
   // const grabLocationData = require('./data/geo.json');
   superagent.get(URL).then(result => {
+    if(result.body.status === 'ZERO_RESULTS'){
+      response.status(500).send('Sorry, something went wrong');
+      return;
+    }
     const searchedResult = result.body.results[0];
     //formatted_query = "Lynnwood, WA, USA"
     const formatted_query = searchedResult.formatted_address;
@@ -81,12 +74,6 @@ function searchWeatherData(request, response) {
   const URL = `https://api.darksky.net/forecast/${process.env.WEATHER_API_KEY}/${request.query.data.latitude},${request.query.data.longitude}`;
   superagent.get(URL).then(result => {
 
-
-    console.log("result lat: " + typeof result.body.latitude);
-    console.log("reqt lat: " + typeof Number(request.query.data.latitude));
-    console.log("result long: " + typeof result.body.longitude);
-    console.log("request long: " + typeof Number(request.query.data.longitude));
-
     if(result.body.latitude === Number(request.query.data.latitude) && result.body.longitude === Number(request.query.data.longitude)){
       //dailyData = array of daily data objects
       let dailyData = result.body.daily.data;
@@ -103,9 +90,7 @@ function searchWeatherData(request, response) {
       });
       response.send(dailyWeather);
     }
-
   })
-  // const grabWeatherData = require('./data/darksky.json');
 }
 
 
