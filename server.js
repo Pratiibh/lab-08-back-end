@@ -21,8 +21,7 @@ app.use(cors());
 app.get('/location', searchLocationData);
 
 app.get('/weather', (request, response) => {
-  const grabWeatherData = require('./data/darksky.json');
-  // response.send(searchWeatherData() );
+  response.send(searchWeatherData() );
 })
 
 //Constructor Functions
@@ -41,7 +40,6 @@ function WeatherData(summary, time){
 //Other Functions
 function searchLocationData(request, response) {
   //user input - ex: if they type in Seattle...search_quer = Seattle
-  console.log('Hello');
   const search_query = request.query.data;
 
   //grabLocationData = Full JSON file
@@ -74,10 +72,9 @@ function searchLocationData(request, response) {
   //responseDataObject = {Seattle, Lynnwood, WA, USA, somenumber, somenumber}
   responseDataObject = new LocationData(search_query, formatted_query, latitude, longitude);
   response.send(responseDataObject);
-  // return responseDataObject;
 }
 
-function searchWeatherData(grabWeatherData) {
+function searchWeatherData() {
   //Grab all weather data
   /*
     ```
@@ -93,28 +90,22 @@ function searchWeatherData(grabWeatherData) {
   ...
 ]
   */
-
-  console.log(responseDataObject.latitude);
+  const grabWeatherData = require('./data/darksky.json');
   if(grabWeatherData.latitude === responseDataObject.latitude && grabWeatherData.longitude === responseDataObject.longitude){
     //dailyData = array of daily data objects
     let dailyData = grabWeatherData.daily.data;
-    let results = [];
 
-    for(let i = 0; i < dailyData.length; i++){
+    return dailyData.map((dailyDataObj) => {
       //summary = "Foggy in the morning."
-      let summary = dailyData[i].summary;
+      let summary = dailyDataObj.summary;
       //time = 1540018800; converted to standart time
-      let time = new Date(dailyData[i].time * 1000).toString().slice(0, 15) ;
+      let time = new Date(dailyDataObj.time * 1000).toString().slice(0, 15) ;
 
 
       //For each entry within dailyData array
       //Create new weather object
-      let eachTime = new WeatherData(summary, time);
-      //Save the results in an array
-      results.push(eachTime);
-    }
-
-    return results;
+      new WeatherData(summary, time);
+    });
   }
 }
 
