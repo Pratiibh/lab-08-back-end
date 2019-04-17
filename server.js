@@ -105,7 +105,7 @@ function searchWeatherData() {
       //summary = "Foggy in the morning."
       let summary = dailyData[i].summary;
       //time = 1540018800; converted to standart time
-      let time = new Date(dailyData[i].time * 1000).slice(1, 15) ;
+      let time = new Date(dailyData[i].time * 1000).toString().slice(0, 15) ;
 
 
       //For each entry within dailyData array
