@@ -18,12 +18,11 @@ const app = express();
 app.use(cors());
 
 //server is doing this
-app.get('/location', (request, response) => {
-  response.send(searchLocationData(request.query.data) );
-})
+app.get('/location', searchLocationData);
 
 app.get('/weather', (request, response) => {
-  response.send(searchWeatherData() );
+  const grabWeatherData = require('./data/darksky.json');
+  // response.send(searchWeatherData() );
 })
 
 //Constructor Functions
@@ -40,9 +39,10 @@ function WeatherData(summary, time){
 }
 
 //Other Functions
-function searchLocationData(frontEndQuery) {
+function searchLocationData(request, response) {
   //user input - ex: if they type in Seattle...search_quer = Seattle
-  const search_query = frontEndQuery;
+  console.log('Hello');
+  const search_query = request.query.data;
 
   //grabLocationData = Full JSON file
   /* 
@@ -73,11 +73,11 @@ function searchLocationData(frontEndQuery) {
   //Create new object containing user input data
   //responseDataObject = {Seattle, Lynnwood, WA, USA, somenumber, somenumber}
   responseDataObject = new LocationData(search_query, formatted_query, latitude, longitude);
-  
-  return responseDataObject;
+  response.send(responseDataObject);
+  // return responseDataObject;
 }
 
-function searchWeatherData() {
+function searchWeatherData(grabWeatherData) {
   //Grab all weather data
   /*
     ```
@@ -93,9 +93,8 @@ function searchWeatherData() {
   ...
 ]
   */
-  const grabWeatherData = require('./data/darksky.json');
 
-
+  console.log(responseDataObject.latitude);
   if(grabWeatherData.latitude === responseDataObject.latitude && grabWeatherData.longitude === responseDataObject.longitude){
     //dailyData = array of daily data objects
     let dailyData = grabWeatherData.daily.data;
