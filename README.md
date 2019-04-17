@@ -26,7 +26,7 @@
 ## Architecture
 Provide a detailed description of the application design. What technologies (languages, libraries, etc) you're using, and any other relevant design information. 
 1. Languages: JavaScript, HTML, CSS
-2. Libraires: express, cors, dotenv
+2. Libraires: express, cors, dotenv, superagent
 3. Tools: Github, Heroku, Trello
 
 
@@ -50,11 +50,18 @@ Use this area to document the iterative changes made to your application as each
         <li>Made code more dry
     </ul>
 
-04-17-2019 10:35pm - Implemented map method for Weather search to make code more dry.
+04-17-2019 10:35am - Implemented map method for Weather search to make code more dry.
+
+04-17-2019 11:00am - Geocode API fully functional
+
+04-17-2019 12:50pm - Weather API fully functional; implemented a route utilizing superagent, and sort using map method
+
+04-17-2019 01:00pm - Updated READme
 
 ## Credits and Collaborations
-<!-- Give credit (and a link) to other people or resources that helped you build this application.
+
 Joseph Hangarter - Day 2 Navigator:  Features #1 & #2
 
+TA - Jeniffer Piper and Crhis Chapman
 
- -->
+Instructor - Nicholas Carignan

@@ -21,8 +21,10 @@ app.use(cors());
 //server is doing this
 app.get('/location', searchLocationData);
 
-app.get('/weather', (request, response) => {
-  response.send(searchWeatherData() );
+app.get('/weather', searchWeatherData);
+
+app.use('*', (request, response) => {
+  response.send('Our server runs.');
 })
 
 //Constructor Functions
@@ -40,29 +42,18 @@ function WeatherData(summary, time){
 
 //Other Functions
 function searchLocationData(request, response) {
+
   //user input - ex: if they type in Seattle...search_quer = Seattle
   const search_query = request.query.data;
   const URL = `https://maps.googleapis.com/maps/api/geocode/json?address=${search_query}&key=${process.env.GEOCODE_API_KEY}`;
   //grabLocationData = Full JSON file
-  /*
-  {
-    "results" : [
-      {
-        "address_components" : [
-          {
-            "long_name" : "Lynnwood",
-            "short_name" : "Lynnwood",
-            "types" : [ "locality", "political" ]
-          },
-          "formatted_address" : "Lynnwood, WA, USA",
-          "geometry" : {
-            "bounds" : {
-              "northeast" : {
-                "lat" : 47.85356789999999,
-                "lng" : -122.261618
-  */
+
   // const grabLocationData = require('./data/geo.json');
   superagent.get(URL).then(result => {
+    if(result.body.status === 'ZERO_RESULTS'){
+      response.status(500).send('Sorry, something went wrong');
+      return;
+    }
     const searchedResult = result.body.results[0];
     //formatted_query = "Lynnwood, WA, USA"
     const formatted_query = searchedResult.formatted_address;
@@ -78,39 +69,28 @@ function searchLocationData(request, response) {
 
 }
 
-function searchWeatherData() {
-  //Grab all weather data
-  /*
-    ```
-[
-  {
-    "forecast": "Partly cloudy until afternoon.",
-    "time": "Mon Jan 01 2001"
-  },
-  {
-    "forecast": "Mostly cloudy in the morning.",
-    "time": "Tue Jan 02 2001"
-  },
-  ...
-]
-  */
-  const grabWeatherData = require('./data/darksky.json');
-  if(grabWeatherData.latitude === responseDataObject.latitude && grabWeatherData.longitude === responseDataObject.longitude){
-    //dailyData = array of daily data objects
-    let dailyData = grabWeatherData.daily.data;
+function searchWeatherData(request, response) {
 
-    return dailyData.map((dailyDataObj) => {
-      //summary = "Foggy in the morning."
-      let summary = dailyDataObj.summary;
-      //time = 1540018800; converted to standart time
-      let time = new Date(dailyDataObj.time * 1000).toString().slice(0, 15) ;
+  const URL = `https://api.darksky.net/forecast/${process.env.WEATHER_API_KEY}/${request.query.data.latitude},${request.query.data.longitude}`;
+  superagent.get(URL).then(result => {
 
-
-      //For each entry within dailyData array
-      //Create new weather object
-      new WeatherData(summary, time);
-    });
-  }
+    if(result.body.latitude === Number(request.query.data.latitude) && result.body.longitude === Number(request.query.data.longitude)){
+      //dailyData = array of daily data objects
+      let dailyData = result.body.daily.data;
+      const dailyWeather = dailyData.map((dailyDataObj) => {
+        //summary = "Foggy in the morning."
+        let summary = dailyDataObj.summary;
+        //time = 1540018800; converted to standart time
+        let time = new Date(dailyDataObj.time * 1000).toString().slice(0, 15) ;
+  
+        //For each entry within dailyData array
+        //Create new weather object
+        new WeatherData(summary, time);
+        return new WeatherData(summary, time);
+      });
+      response.send(dailyWeather);
+    }
+  })
 }
 
 
