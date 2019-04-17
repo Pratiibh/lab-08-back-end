@@ -9,6 +9,7 @@ require('dotenv').config();
 const PORT = process.env.PORT || 3000 ;
 const express = require('express');
 const cors = require('cors');
+const superagent = require('superagent');
 
 let responseDataObject = {};
 
@@ -41,9 +42,9 @@ function WeatherData(summary, time){
 function searchLocationData(request, response) {
   //user input - ex: if they type in Seattle...search_quer = Seattle
   const search_query = request.query.data;
-
+  const URL = `https://maps.googleapis.com/maps/api/geocode/json?address=${search_query}&key=${process.env.GEOCODE_API_KEY}`;
   //grabLocationData = Full JSON file
-  /* 
+  /*
   {
     "results" : [
       {
@@ -60,18 +61,21 @@ function searchLocationData(request, response) {
                 "lat" : 47.85356789999999,
                 "lng" : -122.261618
   */
-  const grabLocationData = require('./data/geo.json');
+  // const grabLocationData = require('./data/geo.json');
+  superagent.get(URL).then(result => {
+    const searchedResult = result.body.results[0];
+    //formatted_query = "Lynnwood, WA, USA"
+    const formatted_query = searchedResult.formatted_address;
 
-  //formatted_query = "Lynnwood, WA, USA"
-  const formatted_query = grabLocationData.results[0].formatted_address;
+    const latitude = searchedResult.geometry.location.lat;
+    const longitude = searchedResult.geometry.location.lng;
 
-  const latitude = grabLocationData.results[0].geometry.location.lat;
-  const longitude = grabLocationData.results[0].geometry.location.lng;
+    //Create new object containing user input data
+    //responseDataObject = {Seattle, Lynnwood, WA, USA, somenumber, somenumber}
+    responseDataObject = new LocationData(search_query, formatted_query, latitude, longitude);
+    response.send(responseDataObject);
+  });
 
-  //Create new object containing user input data
-  //responseDataObject = {Seattle, Lynnwood, WA, USA, somenumber, somenumber}
-  responseDataObject = new LocationData(search_query, formatted_query, latitude, longitude);
-  response.send(responseDataObject);
 }
 
 function searchWeatherData() {
