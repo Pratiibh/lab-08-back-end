@@ -1,0 +1,25 @@
+{
+  "name": "lab-07-back-end",
+  "version": "0.0.2",
+  "description": "**Author**: Melissa Stock, Pratiibh Bassi **Version**: 0.0.1",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MeStock/lab-07-back-end.git"
+  },
+  "author": "Melissa & Joseph",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/MeStock/lab-07-back-end/issues"
+  },
+  "homepage": "https://github.com/MeStock/lab-07-back-end#readme",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^7.0.0",
+    "express": "^4.16.4"
+  }
+}
