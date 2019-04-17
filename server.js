@@ -21,9 +21,7 @@ app.use(cors());
 //server is doing this
 app.get('/location', searchLocationData);
 
-app.get('/weather', (request, response) => {
-  response.send(searchWeatherData() );
-})
+app.get('/weather', searchWeatherData);
 
 //Constructor Functions
 function LocationData(search_query, formatted_query, latitude, longitude){
@@ -78,39 +76,36 @@ function searchLocationData(request, response) {
 
 }
 
-function searchWeatherData() {
-  //Grab all weather data
-  /*
-    ```
-[
-  {
-    "forecast": "Partly cloudy until afternoon.",
-    "time": "Mon Jan 01 2001"
-  },
-  {
-    "forecast": "Mostly cloudy in the morning.",
-    "time": "Tue Jan 02 2001"
-  },
-  ...
-]
-  */
-  const grabWeatherData = require('./data/darksky.json');
-  if(grabWeatherData.latitude === responseDataObject.latitude && grabWeatherData.longitude === responseDataObject.longitude){
-    //dailyData = array of daily data objects
-    let dailyData = grabWeatherData.daily.data;
+function searchWeatherData(request, response) {
 
-    return dailyData.map((dailyDataObj) => {
-      //summary = "Foggy in the morning."
-      let summary = dailyDataObj.summary;
-      //time = 1540018800; converted to standart time
-      let time = new Date(dailyDataObj.time * 1000).toString().slice(0, 15) ;
+  const URL = `https://api.darksky.net/forecast/${process.env.WEATHER_API_KEY}/${request.query.data.latitude},${request.query.data.longitude}`;
+  superagent.get(URL).then(result => {
 
 
-      //For each entry within dailyData array
-      //Create new weather object
-      new WeatherData(summary, time);
-    });
-  }
+    console.log("result lat: " + typeof result.body.latitude);
+    console.log("reqt lat: " + typeof Number(request.query.data.latitude));
+    console.log("result long: " + typeof result.body.longitude);
+    console.log("request long: " + typeof Number(request.query.data.longitude));
+
+    if(result.body.latitude === Number(request.query.data.latitude) && result.body.longitude === Number(request.query.data.longitude)){
+      //dailyData = array of daily data objects
+      let dailyData = result.body.daily.data;
+      const dailyWeather = dailyData.map((dailyDataObj) => {
+        //summary = "Foggy in the morning."
+        let summary = dailyDataObj.summary;
+        //time = 1540018800; converted to standart time
+        let time = new Date(dailyDataObj.time * 1000).toString().slice(0, 15) ;
+  
+        //For each entry within dailyData array
+        //Create new weather object
+        new WeatherData(summary, time);
+        return new WeatherData(summary, time);
+      });
+      response.send(dailyWeather);
+    }
+
+  })
+  // const grabWeatherData = require('./data/darksky.json');
 }
 
 
