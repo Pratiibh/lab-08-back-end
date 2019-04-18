@@ -32,6 +32,14 @@ app.use('*', (request, response) => {
   response.send('Our server runs.');
 })
 
+const SQL = {};
+SQL.getLocation = 'SELECT * FROM locations WHERE search_query=$1'
+SQL.insertLocation = 'INSERT INTO locations (search_query, formatted_query, latitude, longitude) VALUES ($1, $2, $3, $4)'
+
+const API = {};
+API.geoCode = 'https://maps.googleapis.com/maps/api/geocode/json?address=';
+API.darksky = 'https://api.darksky.net/forecast/';
+
 //Constructor Functions
 function LocationData(search_query, formatted_query, latitude, longitude){
   this.search_query = search_query;
@@ -51,6 +59,26 @@ function searchLocationData(request, response) {
   //user input - ex: if they type in Seattle...search_query = Seattle
   const search_query = request.query.data;
   const URL = `https://maps.googleapis.com/maps/api/geocode/json?address=${search_query}&key=${process.env.GEOCODE_API_KEY}`;
+  client.query(SQL.getLocation, [search_query].then(result => {
+    if(result.rows.length) {
+      response.send(result.rows[0])
+      console.log('oh we have your location')
+    } else {
+      dataAdder(search_query, response)
+      console.log('adding new location')
+    }
+  })
+  )
+
+  function dataAdder(searchQuery, response){
+    const url = `${API.geoCode}${searchQuery}&key=${process.env.GEOCODE_API_KEY}`;
+    superagent.get(url).then(result => {
+      const location = new Location(searchQuery, result.body.results[0]);
+      response.send(location);
+      console.log('got location from Google API, inserting into DATABASE');
+      client.query(SQL.insertLocation, [location.search_query, location.formatted_query, location.latitude, location.longitude]);
+    })
+  }
   //grabLocationData = Full JSON file
 
   // const grabLocationData = require('./data/geo.json');
