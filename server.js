@@ -43,20 +43,19 @@ function WeatherData(summary, time){
 //Other Functions
 function searchLocationData(request, response) {
 
-  //user input - ex: if they type in Seattle...search_quer = Seattle
+  //user input - ex: if they type in Seattle...search_query = Seattle
   const search_query = request.query.data;
   const URL = `https://maps.googleapis.com/maps/api/geocode/json?address=${search_query}&key=${process.env.GEOCODE_API_KEY}`;
   //grabLocationData = Full JSON file
 
   // const grabLocationData = require('./data/geo.json');
   superagent.get(URL).then(result => {
+    // This if-statement will throw a 500 error in the console if you search a location that doesn't exist
     if(result.body.status === 'ZERO_RESULTS'){
       response.status(500).send('Sorry, something went wrong');
       return;
     }
     const searchedResult = result.body.results[0];
-    console.log(searchedResult);
-    console.log(result.body);
     //formatted_query = "Lynnwood, WA, USA"
     const formatted_query = searchedResult.formatted_address;
 
