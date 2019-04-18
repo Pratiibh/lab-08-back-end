@@ -55,6 +55,8 @@ function searchLocationData(request, response) {
       return;
     }
     const searchedResult = result.body.results[0];
+    console.log(searchedResult);
+    console.log(result.body);
     //formatted_query = "Lynnwood, WA, USA"
     const formatted_query = searchedResult.formatted_address;
 
@@ -82,7 +84,7 @@ function searchWeatherData(request, response) {
         let summary = dailyDataObj.summary;
         //time = 1540018800; converted to standart time
         let time = new Date(dailyDataObj.time * 1000).toString().slice(0, 15) ;
-  
+
         //For each entry within dailyData array
         //Create new weather object
         new WeatherData(summary, time);
