@@ -60,7 +60,7 @@ Use this area to document the iterative changes made to your application as each
 
 ## Credits and Collaborations
 
-Joseph Hangarter - Day 2 Navigator:  Features #1 & #2
+Joseph Hangarter,  - Day 3 Navigator:  Features #1 & #2
 
 TA - Jeniffer Piper and Crhis Chapman
 
