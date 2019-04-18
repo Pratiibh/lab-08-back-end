@@ -64,13 +64,13 @@ function searchLocationData(request, response) {
       response.send(result.rows[0])
       console.log('oh we have your location')
     } else {
-      dataAdder(search_query, response)
+      sqlTableRowAdder(search_query, response)
       console.log('adding new location')
     }
   })
   )
 
-  function dataAdder(searchQuery, response){
+  function sqlTableRowAdder(searchQuery, response){
     const url = `${API.geoCode}${searchQuery}&key=${process.env.GEOCODE_API_KEY}`;
     superagent.get(url).then(result => {
       const location = new Location(searchQuery, result.body.results[0]);
