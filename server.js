@@ -75,8 +75,9 @@ function searchWeatherData(request, response) {
 
   const URL = `https://api.darksky.net/forecast/${process.env.WEATHER_API_KEY}/${request.query.data.latitude},${request.query.data.longitude}`;
   superagent.get(URL).then(result => {
-
-    if(result.body.latitude === Number(request.query.data.latitude) && result.body.longitude === Number(request.query.data.longitude)){
+    const latitudeRequest = Number(request.query.data.latitude);
+    const longitudeRequest = Number(request.query.data.longitude);
+    if(result.body.latitude === latitudeRequest && result.body.longitude === longitudeRequest){
       //dailyData = array of daily data objects
       let dailyData = result.body.daily.data;
       const dailyWeather = dailyData.map((dailyDataObj) => {
